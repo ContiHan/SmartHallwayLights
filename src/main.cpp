@@ -8,14 +8,14 @@
 #define PWM_BASE_FREQ 2000
 #define PWM_PIN 25
 
+WebServer server(80);
+
 const char *wifiSSID = "Cono'lin_RD";
 const char *wifiPassword = "KldPo.2023";
 
 unsigned long blinkInterval = 1000;
 unsigned long pwmValue = 0;
 bool testingPWM = false;
-
-WebServer server(80);
 
 void setupPWM();
 void setPWMDutyCycle(int dutyCycle);
@@ -39,7 +39,7 @@ void setup()
 
   setWifiConnection();
 
-  String mdnsName = "LED-lightning-corridor";
+  String mdnsName = "smart-led-corridor";
   if (MDNS.begin(mdnsName))
   {
     Serial.println("MDNS responder je zapnuty.");
