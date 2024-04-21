@@ -13,15 +13,12 @@ WebServer server(80);
 const char *wifiSSID = "Cono'lin_RD";
 const char *wifiPassword = "KldPo.2023";
 
-unsigned long blinkInterval = 1000;
 unsigned long pwmValue = 0;
 bool testingPWM = false;
 
 void setupPWM();
 void setPWMDutyCycle(int dutyCycle);
 void cyclePWMTask(void *parameter);
-void blinkLEDTask(void *parameter);
-void printTickTask(void *parameter);
 void initTasks();
 void setWifiConnection();
 void setServerResponses();
@@ -57,8 +54,6 @@ void setup()
 void initTasks()
 {
   xTaskCreate(cyclePWMTask, "PWM Cycle Task", 2048, NULL, 1, NULL);
-  xTaskCreate(blinkLEDTask, "Blink LED Task", 2048, NULL, 1, NULL);
-  xTaskCreate(printTickTask, "Print Tick Task", 2048, NULL, 1, NULL);
 }
 
 void setWifiConnection()
@@ -80,18 +75,6 @@ void setWifiConnection()
 void setServerResponses()
 {
   server.on("/", mainHtmlMessage);
-
-  server.on("/blink250ms", []()
-            {
-    blinkInterval = 250;
-    Serial.println("Spuštěno blikání po 250ms");
-    mainHtmlMessage(); });
-
-  server.on("/blink2000ms", []()
-            {
-    blinkInterval = 2000;
-    Serial.println("Spuštěno blikání po 2000ms");
-    mainHtmlMessage(); });
 
   server.on("/pwm0", []()
             {
@@ -187,12 +170,8 @@ void mainHtmlMessage()
                        "<h1>Ahoj Arduino světe!</h1>"
                        "<p>Čas od spuštění Arduina je " +
                        timeFromStartInSecond + " vteřin.</p>"
-                                               "<p>Interval blikání LED: " +
-                       String(blinkInterval) + "ms</p>"
                                                "<p>PWM nastaveno na: " +
                        String(pwmValue) + "%</p>"
-                                          "<p><a href=\"/blink250ms\">Blikej po 250ms</a></p>"
-                                          "<p><a href=\"/blink2000ms\">Blikej po 2000ms</a></p>"
                                           "<p><a href=\"/pwm0\">PWM 0%</a></p>"
                                           "<p><a href=\"/pwm1\">PWM 1%</a></p>"
                                           "<p><a href=\"/pwm5\">PWM 5%</a></p>"
@@ -256,24 +235,6 @@ void cyclePWMTask(void *parameter)
       testingPWM = false;
     }
     vTaskDelay(pdMS_TO_TICKS(100));
-  }
-}
-
-void blinkLEDTask(void *parameter)
-{
-  for (;;)
-  {
-    Serial.println("led blink..");
-    vTaskDelay(pdMS_TO_TICKS(blinkInterval)); // Čekání na další "bliknutí"
-  }
-}
-
-void printTickTask(void *parameter)
-{
-  for (;;)
-  {
-    Serial.println("tick..");
-    vTaskDelay(pdMS_TO_TICKS(5000)); // Opakování každých 5 sekund
   }
 }
 
