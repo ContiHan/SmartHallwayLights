@@ -2,6 +2,9 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include "Arduino.h"
 
 #define PWM_CHANNEL_0 0
 #define PWM_TIMER_13_BIT 13
@@ -9,12 +12,15 @@
 #define PWM_PIN 25
 
 WebServer server(80);
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
 const char *wifiSSID = "Cono'lin_RD";
 const char *wifiPassword = "KldPo.2023";
 
 byte pwmValue = 0;
 bool testingPWM = false;
+unsigned long startTimestamp;
 
 void setupPWM();
 void setPWMDutyCycle(int dutyCycle);
@@ -24,6 +30,8 @@ void setWifiConnection();
 void setServerResponses();
 void mainHtmlMessage();
 void unknownHtmlMessage();
+void setTimeClient();
+String elapsedTimeHtml();
 
 void setup()
 {
@@ -44,11 +52,20 @@ void setup()
 
   setServerResponses();
 
+  setTimeClient();
+
   server.begin();
   Serial.println("HTTP server je zapnuty.");
   Serial.print("Otevři stránku: http://");
   Serial.print(mdnsName);
   Serial.println("/");
+}
+
+void setTimeClient()
+{
+  timeClient.begin();
+  timeClient.update();
+  startTimestamp = timeClient.getEpochTime();
 }
 
 void initTasks()
@@ -97,7 +114,7 @@ void setServerResponses()
 
 void mainHtmlMessage()
 {
-  String timeFromStartInSecond = String(millis() / 1000);
+  String timeFromStart = elapsedTimeHtml();
   String htmlMessage = "<!DOCTYPE html>"
                        "<html lang=\"cs\">"
                        "<head>"
@@ -115,9 +132,9 @@ void mainHtmlMessage()
                        "</head>"
                        "<body>"
                        "<h1>Ahoj Arduino světe!</h1>"
-                       "<p>Čas od spuštění Arduina je " +
-                       timeFromStartInSecond + " vteřin.</p>"
-                                               "<p>PWM nastaveno na: " +
+                       "<p>Čas od spuštění je " +
+                       timeFromStart + "</p>"
+                                       "<p>PWM nastaveno na: " +
                        String(pwmValue) + "%</p>"
                                           "<form action=\"/setPWM\" method=\"get\">"
                                           "<label for=\"pwm\">PWM:</label>"
@@ -146,6 +163,23 @@ void unknownHtmlMessage()
   }
 
   server.send(404, "text/plain", message);
+}
+
+String elapsedTimeHtml()
+{
+  timeClient.update();
+  unsigned long currentTimestamp = timeClient.getEpochTime();
+  unsigned long elapsedTime = currentTimestamp - startTimestamp;
+
+  unsigned long days = elapsedTime / 86400;
+  elapsedTime %= 86400;
+  unsigned long hours = elapsedTime / 3600;
+  elapsedTime %= 3600;
+  unsigned long minutes = elapsedTime / 60;
+  elapsedTime %= 60;
+  unsigned long seconds = elapsedTime;
+
+  return String(days) + " dní " + String(hours) + " hodin " + String(minutes) + " minut " + String(seconds) + " sekund";
 }
 
 void setupPWM()
