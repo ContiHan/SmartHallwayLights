@@ -10,6 +10,10 @@
 #define PWM_TIMER_13_BIT 13
 #define PWM_BASE_FREQ 2000
 #define PWM_PIN 25
+#define MAX_DUTY 8192
+#define DUTY_STEP 82
+#define PWM_DELAY 50
+#define TASK_DELAY 100
 
 WebServer server(80);
 WiFiUDP ntpUDP;
@@ -17,6 +21,7 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
 const char *wifiSSID = "Cono'lin_RD";
 const char *wifiPassword = "KldPo.2023";
+const char *mdnsName = "smart-led-corridor";
 
 byte pwmValue = 0;
 bool testingPWM = false;
@@ -32,33 +37,37 @@ void mainHtmlMessage();
 void unknownHtmlMessage();
 void setTimeClient();
 String elapsedTimeHtml();
+void startWebServer();
+void setupMDNS();
 
 void setup()
 {
   Serial.begin(115200);
 
   setupPWM();
-  setPWMDutyCycle(0);
-
   initTasks();
-
   setWifiConnection();
-
-  String mdnsName = "smart-led-corridor";
-  if (MDNS.begin(mdnsName))
-  {
-    Serial.println("MDNS responder je zapnuty.");
-  }
-
+  setupMDNS();
   setServerResponses();
-
   setTimeClient();
+  startWebServer();
+}
 
+void startWebServer()
+{
   server.begin();
   Serial.println("HTTP server je zapnuty.");
   Serial.print("Otevři stránku: http://");
   Serial.print(mdnsName);
   Serial.println("/");
+}
+
+void setupMDNS()
+{
+  if (MDNS.begin(mdnsName))
+  {
+    Serial.println("MDNS responder je zapnuty.");
+  }
 }
 
 void setTimeClient()
@@ -98,7 +107,7 @@ void setServerResponses()
   if (server.hasArg("pwm"))
   {
     pwmValue = (byte) server.arg("pwm").toInt();
-    setPWMDutyCycle(map(pwmValue, 0, 100, 0, 8192));
+    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
   }
   mainHtmlMessage(); });
@@ -186,6 +195,7 @@ void setupPWM()
 {
   ledcSetup(PWM_CHANNEL_0, PWM_BASE_FREQ, PWM_TIMER_13_BIT);
   ledcAttachPin(PWM_PIN, PWM_CHANNEL_0);
+  setPWMDutyCycle(0);
 }
 
 void setPWMDutyCycle(int dutyCycle)
@@ -199,19 +209,19 @@ void cyclePWMTask(void *parameter)
   {
     if (testingPWM)
     {
-      for (int duty = 0; duty <= 8192; duty += 82)
+      for (int duty = 0; duty <= MAX_DUTY; duty += DUTY_STEP)
       {
         setPWMDutyCycle(duty);
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(PWM_DELAY));
       }
-      for (int duty = 8192; duty >= 0; duty -= 82)
+      for (int duty = MAX_DUTY; duty >= 0; duty -= DUTY_STEP)
       {
         setPWMDutyCycle(duty);
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(PWM_DELAY));
       }
       testingPWM = false;
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
   }
 }
 
