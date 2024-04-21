@@ -13,7 +13,7 @@ WebServer server(80);
 const char *wifiSSID = "Cono'lin_RD";
 const char *wifiPassword = "KldPo.2023";
 
-unsigned long pwmValue = 0;
+byte pwmValue = 0;
 bool testingPWM = false;
 
 void setupPWM();
@@ -76,68 +76,15 @@ void setServerResponses()
 {
   server.on("/", mainHtmlMessage);
 
-  server.on("/pwm0", []()
+  server.on("/setPWM", []()
             {
-    setPWMDutyCycle(0);
-    pwmValue = 0;
-    Serial.println("PWM na 0%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm1", []()
-            {
-    setPWMDutyCycle(82);
-    pwmValue = 1;
-    Serial.println("PWM na 1%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm5", []()
-            {
-    setPWMDutyCycle(410);
-    pwmValue = 5;
-    Serial.println("PWM na 5%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm10", []()
-            {
-    setPWMDutyCycle(819);
-    pwmValue = 10;
-    Serial.println("PWM na 10%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm15", []()
-            {
-    setPWMDutyCycle(1229);
-    pwmValue = 15;
-    Serial.println("PWM na 15%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm20", []()
-            {
-    setPWMDutyCycle(1638);
-    pwmValue = 20;
-    Serial.println("PWM na 20%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm30", []()
-            {
-    setPWMDutyCycle(2458);
-    pwmValue = 30;
-    Serial.println("PWM na 30%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm50", []()
-            {
-    setPWMDutyCycle(4096);
-    pwmValue = 50;
-    Serial.println("PWM na 50%");
-    mainHtmlMessage(); });
-
-  server.on("/pwm100", []()
-            {
-    setPWMDutyCycle(8192);
-    pwmValue = 100;
-    Serial.println("PWM na 100%");
-    mainHtmlMessage(); });
+  if (server.hasArg("pwm"))
+  {
+    pwmValue = (byte) server.arg("pwm").toInt();
+    setPWMDutyCycle(map(pwmValue, 0, 100, 0, 8192));
+    Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
+  }
+  mainHtmlMessage(); });
 
   server.on("/testPWM", []()
             {
@@ -172,15 +119,11 @@ void mainHtmlMessage()
                        timeFromStartInSecond + " vteřin.</p>"
                                                "<p>PWM nastaveno na: " +
                        String(pwmValue) + "%</p>"
-                                          "<p><a href=\"/pwm0\">PWM 0%</a></p>"
-                                          "<p><a href=\"/pwm1\">PWM 1%</a></p>"
-                                          "<p><a href=\"/pwm5\">PWM 5%</a></p>"
-                                          "<p><a href=\"/pwm10\">PWM 10%</a></p>"
-                                          "<p><a href=\"/pwm15\">PWM 15%</a></p>"
-                                          "<p><a href=\"/pwm20\">PWM 20%</a></p>"
-                                          "<p><a href=\"/pwm30\">PWM 30%</a></p>"
-                                          "<p><a href=\"/pwm50\">PWM 50%</a></p>"
-                                          "<p><a href=\"/pwm100\">PWM 100%</a></p>"
+                                          "<form action=\"/setPWM\" method=\"get\">"
+                                          "<label for=\"pwm\">PWM:</label>"
+                                          "<input type=\"number\" id=\"pwm\" name=\"pwm\" min=\"0\" max=\"100\">"
+                                          "<input type=\"submit\" value=\"Nastavit\">"
+                                          "</form>"
                                           "<p><a href=\"/testPWM\">Test PWM</a></p>"
                                           "</body>"
                                           "</html>";
