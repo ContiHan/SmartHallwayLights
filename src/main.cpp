@@ -106,7 +106,8 @@ void setServerResponses()
             {
   if (server.hasArg("pwm"))
   {
-    pwmValue = (byte) server.arg("pwm").toInt();
+    int tempPwmValue = server.arg("pwm").toInt();
+    pwmValue = (byte) constrain(tempPwmValue, 0, 100);
     setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
   }
@@ -147,7 +148,7 @@ void mainHtmlMessage()
                        String(pwmValue) + "%</p>"
                                           "<form action=\"/setPWM\" method=\"get\">"
                                           "<label for=\"pwm\">PWM:</label>"
-                                          "<input type=\"number\" id=\"pwm\" name=\"pwm\" min=\"0\" max=\"100\">"
+                                          "<input type=\"number\" id=\"pwm\" name=\"pwm\" min=\"0\" max=\"100\" required>"
                                           "<input type=\"submit\" value=\"Nastavit\">"
                                           "</form>"
                                           "<p><a href=\"/testPWM\">Test PWM</a></p>"
