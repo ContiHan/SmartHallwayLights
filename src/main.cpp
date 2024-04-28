@@ -1,3 +1,4 @@
+#include <WifiCredentials.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
@@ -20,8 +21,6 @@ WebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
-const char *wifiSSID = "Cono'lin_RD";
-const char *wifiPassword = "KldPo.2023";
 const char *mdnsName = "smart-led-corridor";
 
 byte pwmValue = 0;
