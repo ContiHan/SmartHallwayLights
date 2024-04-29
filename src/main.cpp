@@ -46,20 +46,13 @@ void setupMDNS();
 void initArduinoOTA();
 void loadFileIntoMemory(const char *fileName, String &memory);
 void redirectToRoot();
+void initSPIFFSAndLoadFiles();
 
 void setup()
 {
   Serial.begin(115200);
 
-  if (!SPIFFS.begin(true))
-  {
-    Serial.println("An Error has occurred while mounting SPIFFS");
-    return;
-  }
-
-  loadFileIntoMemory("/index.html", indexHtml);
-  loadFileIntoMemory("/style.css", styleCss);
-
+  initSPIFFSAndLoadFiles();
   setupPWM();
   initTasks();
   setWifiConnection();
@@ -68,6 +61,18 @@ void setup()
   setTimeClient();
   startWebServer();
   initArduinoOTA();
+}
+
+void initSPIFFSAndLoadFiles()
+{
+  if (!SPIFFS.begin(true))
+  {
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
+
+  loadFileIntoMemory("/index.html", indexHtml);
+  loadFileIntoMemory("/style.css", styleCss);
 }
 
 void loadFileIntoMemory(const char *path, String &dest)
