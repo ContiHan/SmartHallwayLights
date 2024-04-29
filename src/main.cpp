@@ -5,6 +5,7 @@
 #include <ESPmDNS.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <SPIFFS.h>
 #include "Arduino.h"
 #include "ArduinoOTA.h"
 
@@ -44,6 +45,12 @@ void initArduinoOTA();
 void setup()
 {
   Serial.begin(115200);
+
+  if (!SPIFFS.begin(true))
+  {
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
 
   setupPWM();
   initTasks();
@@ -139,6 +146,20 @@ void setWifiConnection()
 
 void setServerResponses()
 {
+  // Nový handler pro "/test"
+  server.on("/test", HTTP_GET, []()
+            {
+    File file = SPIFFS.open("/index.html", "r"); // Používá stejný index.html soubor
+    server.streamFile(file, "text/html");
+    file.close(); });
+
+  // Nový handler pro CSS specifické pro testovací stránku
+  server.on("/test/style.css", HTTP_GET, []()
+            {
+    File file = SPIFFS.open("/style.css", "r"); // Používá stejný style.css soubor
+    server.streamFile(file, "text/css");
+    file.close(); });
+
   server.on("/", mainHtmlMessage);
 
   server.on("/setPWM", []()
