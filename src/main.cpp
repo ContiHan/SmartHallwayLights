@@ -24,6 +24,9 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
 const char *mdnsName = "smart-led-corridor";
 
+String indexHtml;
+String styleCss;
+
 byte pwmValue = 0;
 bool testingPWM = false;
 unsigned long startTimestamp;
@@ -41,6 +44,8 @@ String elapsedTimeHtml();
 void startWebServer();
 void setupMDNS();
 void initArduinoOTA();
+void loadFileIntoMemory(const char *fileName, String &memory);
+void redirectToRoot();
 
 void setup()
 {
@@ -52,6 +57,9 @@ void setup()
     return;
   }
 
+  loadFileIntoMemory("/index.html", indexHtml);
+  loadFileIntoMemory("/style.css", styleCss);
+
   setupPWM();
   initTasks();
   setWifiConnection();
@@ -60,6 +68,19 @@ void setup()
   setTimeClient();
   startWebServer();
   initArduinoOTA();
+}
+
+void loadFileIntoMemory(const char *path, String &dest)
+{
+  File file = SPIFFS.open(path, "r");
+  if (!file)
+  {
+    Serial.println("Failed to open file for reading");
+    return;
+  }
+
+  dest = file.readString();
+  file.close();
 }
 
 void initArduinoOTA()
@@ -146,21 +167,25 @@ void setWifiConnection()
 
 void setServerResponses()
 {
-  // Nový handler pro "/test"
-  server.on("/test", HTTP_GET, []()
-            {
-    File file = SPIFFS.open("/index.html", "r"); // Používá stejný index.html soubor
-    server.streamFile(file, "text/html");
-    file.close(); });
+  server.on("/", []()
+            { server.send(200, "text/html; charset=UTF-8", indexHtml); });
 
-  // Nový handler pro CSS specifické pro testovací stránku
-  server.on("/test/style.css", HTTP_GET, []()
-            {
-    File file = SPIFFS.open("/style.css", "r"); // Používá stejný style.css soubor
-    server.streamFile(file, "text/css");
-    file.close(); });
+  server.on("/style.css", []()
+            { server.send(200, "text/css", styleCss); });
 
-  server.on("/", mainHtmlMessage);
+  server.on("/led-on", []()
+            {
+    pwmValue = 28;
+    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
+    Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
+    redirectToRoot(); });
+
+  server.on("/led-off", []()
+            {
+    pwmValue = 0;
+    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
+    Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
+    redirectToRoot(); });
 
   server.on("/setPWM", []()
             {
@@ -171,51 +196,21 @@ void setServerResponses()
     setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
   }
-  mainHtmlMessage(); });
+  redirectToRoot(); });
 
   server.on("/testPWM", []()
             {
     testingPWM = true;
     Serial.println("Začíná test PWM cyklu");
-    mainHtmlMessage(); });
+    redirectToRoot(); });
 
   server.onNotFound(unknownHtmlMessage);
 }
 
-void mainHtmlMessage()
+void redirectToRoot()
 {
-  String timeFromStart = elapsedTimeHtml();
-  String htmlMessage = "<!DOCTYPE html>"
-                       "<html lang=\"cs\">"
-                       "<head>"
-                       "<meta charset=\"UTF-8\">"
-                       "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-                       "<title>Smart LED Corridor</title>"
-                       "<link rel=\"icon\" href=\"https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://dev.to&size=16\" type=\"image/x-icon\">"
-                       "<style>"
-                       "body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; }"
-                       "h1 { color: #333366; }"
-                       "p { color: #666666; }"
-                       "a { background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; }"
-                       "a:hover { background-color: #45a049; }"
-                       "</style>"
-                       "</head>"
-                       "<body>"
-                       "<h1>Chytré osvětlení chodby</h1>"
-                       "<p>Čas od spuštění je " +
-                       timeFromStart + "</p>"
-                                       "<p>PWM nastaveno na: " +
-                       String(pwmValue) + "%</p>"
-                                          "<form action=\"/setPWM\" method=\"get\">"
-                                          "<label for=\"pwm\">PWM:</label>"
-                                          "<input type=\"number\" id=\"pwm\" name=\"pwm\" min=\"0\" max=\"100\" required>"
-                                          "<input type=\"submit\" value=\"Nastavit\">"
-                                          "</form>"
-                                          "<p><a href=\"/testPWM\">Test PWM</a></p>"
-                                          "</body>"
-                                          "</html>";
-
-  server.send(200, "text/html", htmlMessage);
+  server.sendHeader("Location", "/");
+  server.send(303);
 }
 
 void unknownHtmlMessage()

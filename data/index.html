@@ -1,12 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8\" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Text page</title>
-    <link rel="stylesheet" href="/test/style.css" />
+    <title>Smart LED Corridor</title>
+    <link
+      rel="icon"
+      href="https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://dev.to&size=16"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Test separace</h1>
+    <h1>Chytré osvětlení chodby</h1>
+    <div class="section-control">
+      <a class="btn btn-big" href="/led-on">Zapnout</a>
+      <a class="btn btn-big" href="/led-off">Vypnout</a>
+    </div>
+    <p>Čas od spuštění je + timeFromStart</p>
+    <p>PWM nastaveno na String(pwmValue) + %</p>
+    <form action="/setPWM" method="get">
+      <label for="pwm">PWM</label>
+      <input type="number" id="pwm" name="pwm" min="0" max="100" required />
+      <input class="btn" type="submit" value="Nastavit" />
+    </form>
+    <p><a class="btn" href="/testPWM">Test PWM</a></p>
   </body>
 </html>
