@@ -26,6 +26,12 @@ const char *mdnsName = "smart-led-corridor";
 
 String indexHtml;
 String styleCss;
+String appleTouchIcon;
+String favicon32x32;
+String favicon16x16;
+String siteWebmanifest;
+String androidChrome192x192;
+String adnroidChrome512x512;
 
 byte pwmValue = 0;
 bool testingPWM = false;
@@ -37,6 +43,7 @@ void cyclePWMTask(void *parameter);
 void initTasks();
 void setWifiConnection();
 void setServerResponses();
+void setFaviconServerResponses();
 void mainHtmlMessage();
 void unknownHtmlMessage();
 void setTimeClient();
@@ -73,6 +80,12 @@ void initSPIFFSAndLoadFiles()
 
   loadFileIntoMemory("/index.html", indexHtml);
   loadFileIntoMemory("/style.css", styleCss);
+  loadFileIntoMemory("/apple-touch-icon.png", appleTouchIcon);
+  loadFileIntoMemory("/favicon-32x32.png", favicon32x32);
+  loadFileIntoMemory("/favicon-16x16.png", favicon16x16);
+  loadFileIntoMemory("/site.webmanifest", siteWebmanifest);
+  loadFileIntoMemory("/android-chrome-192x192.png", androidChrome192x192);
+  loadFileIntoMemory("/android-chrome-512x512.png", adnroidChrome512x512);
 }
 
 void loadFileIntoMemory(const char *path, String &dest)
@@ -178,6 +191,8 @@ void setServerResponses()
   server.on("/style.css", []()
             { server.send(200, "text/css", styleCss); });
 
+  setFaviconServerResponses();
+
   server.on("/led-on", []()
             {
     pwmValue = 28;
@@ -210,6 +225,27 @@ void setServerResponses()
     redirectToRoot(); });
 
   server.onNotFound(unknownHtmlMessage);
+}
+
+void setFaviconServerResponses()
+{
+  server.on("/apple-touch-icon.png", []()
+            { server.send(200, "image/png", appleTouchIcon); });
+
+  server.on("/favicon-32x32.png", []()
+            { server.send(200, "image/png", favicon32x32); });
+
+  server.on("/favicon-16x16.png", []()
+            { server.send(200, "image/png", favicon16x16); });
+
+  server.on("/android-chrome-192x192.png", []()
+            { server.send(200, "image/png", androidChrome192x192); });
+
+  server.on("/android-chrome-512x512.png", []()
+            { server.send(200, "image/png", adnroidChrome512x512); });
+
+  server.on("/site.webmanifest", []()
+            { server.send(200, "application/manifest+json", siteWebmanifest); });
 }
 
 void redirectToRoot()
