@@ -26,6 +26,7 @@ const char *mdnsName = "smart-led-corridor";
 
 String indexHtml;
 String styleCss;
+String javascript;
 String appleTouchIcon;
 String favicon32x32;
 String favicon16x16;
@@ -79,6 +80,7 @@ void initSPIFFSAndLoadFiles()
 
   loadFileIntoMemory("/index.html", indexHtml);
   loadFileIntoMemory("/style.css", styleCss);
+  loadFileIntoMemory("/script.js", javascript);
   loadFileIntoMemory("/apple-touch-icon.png", appleTouchIcon);
   loadFileIntoMemory("/favicon-32x32.png", favicon32x32);
   loadFileIntoMemory("/favicon-16x16.png", favicon16x16);
@@ -190,7 +192,16 @@ void setServerResponses()
   server.on("/style.css", []()
             { server.send(200, "text/css", styleCss); });
 
+  server.on("/script.js", []()
+            { server.send(200, "application/javascript", javascript); });
+
   setFaviconServerResponses();
+
+  server.on("/time-since-startup", []()
+            { server.send(200, "text/plain", elapsedTimeHtml()); });
+
+  server.on("/pwm-value", []()
+            { server.send(200, "text/plain", String(pwmValue)); });
 
   server.on("/led-on", []()
             {
@@ -284,7 +295,9 @@ String elapsedTimeHtml()
   elapsedTime %= 60;
   unsigned long seconds = elapsedTime;
 
-  return String(days) + " dní " + String(hours) + " hodin " + String(minutes) + " minut " + String(seconds) + " sekund";
+  char buffer[12];
+  sprintf(buffer, "%02d:%02d:%02d:%02d", days, hours, minutes, seconds);
+  return String(buffer);
 }
 
 void setupPWM()

@@ -31,8 +31,8 @@
       </div>
       <div class="section-configuration">
         <h2 class="header-secondary">Konfigurace</h2>
-        <p>Čas od spuštění je + timeFromStart</p>
-        <p>PWM nastaveno na String(pwmValue) + %</p>
+        <p id="time-since-startup"></p>
+        <p id="pwm-value"></p>
         <form action="/setPWM" method="get">
           <label for="pwm">PWM</label>
           <input type="number" id="pwm" name="pwm" min="0" max="100" required />
@@ -41,5 +41,6 @@
         <p><a class="btn" href="/testPWM">Test PWM</a></p>
       </div>
     </div>
+    <script src="script.js"></script>
   </body>
 </html>
