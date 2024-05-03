@@ -4,25 +4,42 @@
     <meta charset="UTF-8\" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart LED Corridor</title>
+
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Chytré osvětlení chodby</h1>
-    <div class="section-control">
-      <a class="btn btn-big" href="/led-on">Zapnout</a>
-      <a class="btn btn-big" href="/led-off">Vypnout</a>
+    <div class="container">
+      <h1 class="header-primary">Chytrá LED chodba</h1>
+      <div class="section-control">
+        <h2 class="header-secondary">Ovládání</h2>
+        <div class="buttons">
+          <a class="btn btn-big" href="/led-on">Zapnout</a>
+          <a class="btn btn-big" href="/led-off">Vypnout</a>
+        </div>
+      </div>
+      <div class="section-configuration">
+        <h2 class="header-secondary">Konfigurace</h2>
+        <p>Čas od spuštění je + timeFromStart</p>
+        <p>PWM nastaveno na String(pwmValue) + %</p>
+        <form action="/setPWM" method="get">
+          <label for="pwm">PWM</label>
+          <input type="number" id="pwm" name="pwm" min="0" max="100" required />
+          <input class="btn" type="submit" value="Nastavit" />
+        </form>
+        <p><a class="btn" href="/testPWM">Test PWM</a></p>
+      </div>
     </div>
-    <p>Čas od spuštění je + timeFromStart</p>
-    <p>PWM nastaveno na String(pwmValue) + %</p>
-    <form action="/setPWM" method="get">
-      <label for="pwm">PWM</label>
-      <input type="number" id="pwm" name="pwm" min="0" max="100" required />
-      <input class="btn" type="submit" value="Nastavit" />
-    </form>
-    <p><a class="btn" href="/testPWM">Test PWM</a></p>
   </body>
 </html>
