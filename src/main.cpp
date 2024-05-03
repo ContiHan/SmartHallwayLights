@@ -44,7 +44,6 @@ void initTasks();
 void setWifiConnection();
 void setServerResponses();
 void setFaviconServerResponses();
-void mainHtmlMessage();
 void unknownHtmlMessage();
 void setTimeClient();
 String elapsedTimeHtml();
