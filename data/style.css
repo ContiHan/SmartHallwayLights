@@ -12,6 +12,32 @@ body {
   color: #666666;
 }
 
+#time-since-startup strong {
+  position: relative;
+}
+
+#time-since-startup strong::after {
+  content: "Formát údaje času od spuštění\Ar.ddd.hh:mm:ss";
+  font-weight: normal;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4caf50;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  opacity: 0;
+  transition: opacity 0s ease-in-out;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+#time-since-startup strong:hover::after {
+  opacity: 1;
+  transition-delay: 0.3s;
+}
+
 .header-primary {
   justify-self: center;
   color: #333366;

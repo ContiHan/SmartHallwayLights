@@ -287,6 +287,8 @@ String elapsedTimeHtml()
   unsigned long currentTimestamp = timeClient.getEpochTime();
   unsigned long elapsedTime = currentTimestamp - startTimestamp;
 
+  unsigned long years = elapsedTime / (86400 * 365);
+  elapsedTime %= (86400 * 365);
   unsigned long days = elapsedTime / 86400;
   elapsedTime %= 86400;
   unsigned long hours = elapsedTime / 3600;
@@ -295,8 +297,8 @@ String elapsedTimeHtml()
   elapsedTime %= 60;
   unsigned long seconds = elapsedTime;
 
-  char buffer[12];
-  sprintf(buffer, "%02d:%02d:%02d:%02d", days, hours, minutes, seconds);
+  char buffer[20];
+  sprintf(buffer, "%d.%03d.%02d:%02d:%02d", years, days, hours, minutes, seconds);
   return String(buffer);
 }
 
