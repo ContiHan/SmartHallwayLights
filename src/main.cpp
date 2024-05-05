@@ -18,6 +18,15 @@
 #define PWM_DELAY 50
 #define TASK_DELAY 100
 
+#define BREATH_IN_START 22
+#define BREATH_IN_END 35
+#define BREATH_OUT_START 35
+#define BREATH_OUT_END 22
+#define BREATH_IN_TIME 2000
+#define BREATH_HOLD_IN_TIME 1000
+#define BREATH_OUT_TIME 2000
+#define BREATH_HOLD_OUT_TIME 2500
+
 WebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
@@ -36,11 +45,13 @@ String adnroidChrome512x512;
 
 byte pwmValue = 0;
 bool testingPWM = false;
+bool breathing = false;
 unsigned long startTimestamp;
 
 void setupPWM();
 void setPWMDutyCycle(int dutyCycle);
 void cyclePWMTask(void *parameter);
+void breathPWMTask(void *parameter);
 void initTasks();
 void setWifiConnection();
 void setServerResponses();
@@ -187,6 +198,7 @@ void setTimeClient()
 void initTasks()
 {
   xTaskCreate(cyclePWMTask, "PWM Cycle Task", 2048, NULL, 1, NULL);
+  xTaskCreate(breathPWMTask, "Breath PWM Task", 2048, NULL, 1, NULL);
 }
 
 void setWifiConnection()
@@ -246,6 +258,18 @@ void setServerResponses()
     setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
   }
+  redirectToRoot(); });
+
+  server.on("/breath-on", []()
+            {
+  breathing = true;
+  Serial.println("Breathing mode turned on");
+  redirectToRoot(); });
+
+  server.on("/breath-off", []()
+            {
+  breathing = false;
+  Serial.println("Breathing mode turned off");
   redirectToRoot(); });
 
   server.on("/testPWM", []()
@@ -351,6 +375,39 @@ void cyclePWMTask(void *parameter)
         vTaskDelay(pdMS_TO_TICKS(PWM_DELAY));
       }
       testingPWM = false;
+    }
+    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
+  }
+}
+
+void breathPWMTask(void *parameter)
+{
+  for (;;)
+  {
+    if (breathing)
+    {
+      // Breath in
+      for (int duty = BREATH_IN_START; duty <= BREATH_IN_END; duty++)
+      {
+        int scaledDuty = map(duty, 0, 100, 0, MAX_DUTY);
+        setPWMDutyCycle(scaledDuty);
+        vTaskDelay(pdMS_TO_TICKS(BREATH_IN_TIME / (BREATH_IN_END - BREATH_IN_START)));
+      }
+      // Hold breath
+      vTaskDelay(pdMS_TO_TICKS(BREATH_HOLD_IN_TIME));
+      // Breath out
+      for (int duty = BREATH_OUT_START; duty >= BREATH_OUT_END; duty--)
+      {
+        int scaledDuty = map(duty, 0, 100, 0, MAX_DUTY);
+        setPWMDutyCycle(scaledDuty);
+        vTaskDelay(pdMS_TO_TICKS(BREATH_OUT_TIME / (BREATH_OUT_START - BREATH_OUT_END)));
+      }
+      // Hold breath
+      vTaskDelay(pdMS_TO_TICKS(BREATH_HOLD_OUT_TIME - TASK_DELAY));
+    }
+    else
+    {
+      setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     }
     vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
   }
