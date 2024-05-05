@@ -54,6 +54,8 @@ void initArduinoOTA();
 void loadFileIntoMemory(const char *fileName, String &memory);
 void redirectToRoot();
 void initSPIFFSAndLoadFiles();
+void fadeIn(int targetValue);
+void fadeOut(int targetValue);
 
 void setup()
 {
@@ -68,6 +70,26 @@ void setup()
   setTimeClient();
   startWebServer();
   initArduinoOTA();
+}
+
+void fadeIn(int targetValue)
+{
+  for (int i = 0; i <= targetValue; i++)
+  {
+    pwmValue = i;
+    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
+    delay(PWM_DELAY);
+  }
+}
+
+void fadeOut(int targetValue)
+{
+  for (int i = pwmValue; i >= targetValue; i--)
+  {
+    pwmValue = i;
+    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
+    delay(PWM_DELAY);
+  }
 }
 
 void initSPIFFSAndLoadFiles()
@@ -205,15 +227,13 @@ void setServerResponses()
 
   server.on("/led-on", []()
             {
-    pwmValue = 28;
-    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
+    fadeIn(28);
     Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
     redirectToRoot(); });
 
   server.on("/led-off", []()
             {
-    pwmValue = 0;
-    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
+    fadeOut(0);
     Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
     redirectToRoot(); });
 
