@@ -8,6 +8,7 @@
 - [x] Add dynamic HTML content via JS
 - [ ] Add slow fade in and fade out
 - [ ] Add customizable period of fade in / outs
+- [ ] Refactor to classes
 
 # CLI
 
