@@ -13,6 +13,7 @@
 #define PWM_TIMER_13_BIT 13
 #define PWM_BASE_FREQ 2000
 #define PWM_PIN 25
+#define RELAY_LED_MINUS_PIN 26
 #define MAX_DUTY 8192
 #define DUTY_STEP 82
 #define PWM_DELAY 50
@@ -49,6 +50,7 @@ bool breathing = false;
 unsigned long startTimestamp;
 
 void setupPWM();
+void setupRelays();
 void setPWMDutyCycle(int dutyCycle);
 void cyclePWMTask(void *parameter);
 void breathPWMTask(void *parameter);
@@ -67,6 +69,8 @@ void redirectToRoot();
 void initSPIFFSAndLoadFiles();
 void fadeIn(int targetValue);
 void fadeOut(int targetValue);
+void turnLedPowerSupplyOn();
+void turnLedPowerSupplyOff();
 
 void setup()
 {
@@ -74,6 +78,7 @@ void setup()
 
   initSPIFFSAndLoadFiles();
   setupPWM();
+  setupRelays();
   initTasks();
   setWifiConnection();
   setupMDNS();
@@ -83,8 +88,19 @@ void setup()
   initArduinoOTA();
 }
 
+void turnLedPowerSupplyOn()
+{
+  digitalWrite(RELAY_LED_MINUS_PIN, LOW);
+}
+
+void turnLedPowerSupplyOff()
+{
+  digitalWrite(RELAY_LED_MINUS_PIN, HIGH);
+}
+
 void fadeIn(int targetValue)
 {
+  turnLedPowerSupplyOn();
   for (int i = 0; i <= targetValue; i++)
   {
     pwmValue = i;
@@ -101,6 +117,7 @@ void fadeOut(int targetValue)
     setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     delay(PWM_DELAY);
   }
+  turnLedPowerSupplyOff();
 }
 
 void initSPIFFSAndLoadFiles()
@@ -344,6 +361,12 @@ String elapsedTimeHtml()
   char buffer[20];
   sprintf(buffer, "%d.%03d.%02d:%02d:%02d", years, days, hours, minutes, seconds);
   return String(buffer);
+}
+
+void setupRelays()
+{
+  pinMode(RELAY_LED_MINUS_PIN, OUTPUT);
+  turnLedPowerSupplyOff();
 }
 
 void setupPWM()
