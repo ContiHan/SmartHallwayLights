@@ -67,8 +67,8 @@ void initArduinoOTA();
 void loadFileIntoMemory(const char *fileName, String &memory);
 void redirectToRoot();
 void initSPIFFSAndLoadFiles();
-void fadeIn(int targetValue);
-void fadeOut(int targetValue);
+void fadeIn(byte startValue, byte endValue);
+void fadeOut(byte startValue, byte endValue);
 void turnLedPowerSupplyOn();
 void turnLedPowerSupplyOff();
 
@@ -98,26 +98,38 @@ void turnLedPowerSupplyOff()
   digitalWrite(RELAY_LED_MINUS_PIN, HIGH);
 }
 
-void fadeIn(int targetValue)
+void fadeIn(byte startValue, byte endValue)
 {
-  turnLedPowerSupplyOn();
-  for (int i = 0; i <= targetValue; i++)
+  if (pwmValue == 0)
+  {
+    turnLedPowerSupplyOn();
+  }
+
+  for (int i = startValue; i <= endValue; i++)
   {
     pwmValue = i;
     setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     delay(PWM_DELAY);
   }
+
+  Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
 }
 
-void fadeOut(int targetValue)
+void fadeOut(byte startValue, byte endValue)
 {
-  for (int i = pwmValue; i >= targetValue; i--)
+  for (int i = startValue; i >= endValue; i--)
   {
     pwmValue = i;
     setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     delay(PWM_DELAY);
   }
-  turnLedPowerSupplyOff();
+
+  if (pwmValue == 0)
+  {
+    turnLedPowerSupplyOff();
+  }
+
+  Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
 }
 
 void initSPIFFSAndLoadFiles()
@@ -256,14 +268,17 @@ void setServerResponses()
 
   server.on("/led-on", []()
             {
-    fadeIn(28);
-    Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
+    if (pwmValue < 28)
+    {
+      fadeIn(pwmValue, 28);
+    } else {
+      fadeOut(pwmValue, 28);
+    }
     redirectToRoot(); });
 
   server.on("/led-off", []()
             {
-    fadeOut(0);
-    Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
+    fadeOut(pwmValue, 0);
     redirectToRoot(); });
 
   server.on("/setPWM", []()
@@ -271,9 +286,18 @@ void setServerResponses()
   if (server.hasArg("pwm"))
   {
     int tempPwmValue = server.arg("pwm").toInt();
-    pwmValue = (byte) constrain(tempPwmValue, 0, 100);
-    setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
-    Serial.println("PWM nastaveno na " + String(pwmValue) + "%");
+    byte safePwmValue = (byte) constrain(tempPwmValue, 0, 100);
+
+    if (safePwmValue > pwmValue)
+    {
+      fadeIn(pwmValue, safePwmValue);
+    }
+    else
+    {
+      fadeOut(pwmValue, safePwmValue);
+    }
+
+    pwmValue = safePwmValue;
   }
   redirectToRoot(); });
 
