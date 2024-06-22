@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang="cs">
   <head>
-    <meta charset="UTF-8\" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart LED Corridor</title>
-
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <title>Osvětlení chodby</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,33 +12,105 @@
       rel="stylesheet"
     />
 
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
+  <body class="off">
     <div class="container">
-      <h1 class="header-primary">Chytrá LED chodba</h1>
-      <div class="section-control">
-        <h2 class="header-secondary">Ovládání</h2>
-        <div class="buttons">
-          <a class="btn btn-big" href="/led-on">Zapnout</a>
-          <a class="btn btn-big" href="/led-off">Vypnout</a>
+      <div class="card">
+        <h1>Osvětlení Chodby</h1>
+        <div class="bulb">
+          <svg
+            class="bulb-icon-off"
+            viewBox="0 0 24.00 24.00"
+            fill="currentColor"
+          >
+            <g>
+              <path
+                d="M13.8685 15.6307H10.1317C9.93062 15.6307 9.75023 15.5101 9.68217 15.3209C9.55355 14.9633 9.33027 14.291 9.0665 13.2777C8.63254 11.6107 7.09803 10.0613 7.59956 8.41141C8.1714 6.53022 9.93465 5.63066 12 5.63066C14.0654 5.63066 15.8286 6.53022 16.4004 8.41141C16.902 10.0613 15.3677 11.6107 14.9338 13.2777C14.67 14.291 14.4467 14.9633 14.318 15.3209C14.25 15.5101 14.0696 15.6307 13.8685 15.6307Z"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M13.375 17.6307H10.875C10.5989 17.6307 10.375 17.8545 10.375 18.1307V19.4061C10.375 19.5489 10.4361 19.6849 10.5428 19.7798L11.3579 20.5044C11.4494 20.5857 11.5676 20.6307 11.6901 20.6307H12.6679C12.8005 20.6307 12.9277 20.578 13.0214 20.4842L13.7286 19.7771C13.8223 19.6833 13.875 19.5562 13.875 19.4236V18.1307C13.875 17.8545 13.6511 17.6307 13.375 17.6307Z"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+            </g>
+          </svg>
+          <svg
+            class="bulb-icon-on"
+            viewBox="0 0 24.00 24.00"
+            fill="currentColor"
+          >
+            <g id="SVGRepo_iconCarrier">
+              <path
+                d="M13.8685 15.6307H10.1317C9.93062 15.6307 9.75023 15.5101 9.68217 15.3209C9.55355 14.9633 9.33027 14.291 9.0665 13.2777C8.63254 11.6107 7.09803 10.0613 7.59956 8.41141C8.1714 6.53022 9.93465 5.63066 12 5.63066C14.0654 5.63066 15.8286 6.53022 16.4004 8.41141C16.902 10.0613 15.3677 11.6107 14.9338 13.2777C14.67 14.291 14.4467 14.9633 14.318 15.3209C14.25 15.5101 14.0696 15.6307 13.8685 15.6307Z"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M13.375 17.6307H10.875C10.5989 17.6307 10.375 17.8545 10.375 18.1307V19.4061C10.375 19.5489 10.4361 19.6849 10.5428 19.7798L11.3579 20.5044C11.4494 20.5857 11.5676 20.6307 11.6901 20.6307H12.6679C12.8005 20.6307 12.9277 20.578 13.0214 20.4842L13.7286 19.7771C13.8223 19.6833 13.875 19.5562 13.875 19.4236V18.1307C13.875 17.8545 13.6511 17.6307 13.375 17.6307Z"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M20 9.5H22"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M19 6L20.5 5"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M19 13L20.5 14"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M4 9.5H2"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M5 6L3.5 5"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+              <path
+                d="M5 13L3.5 14"
+                stroke="currentColor"
+                stroke-width="0.6"
+                stroke-linecap="round"
+              ></path>
+            </g>
+          </svg>
         </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-switch" />
+          <span class="slider round"></span>
+          <span class="slider-text">OFF</span>
+        </label>
       </div>
-      <div class="section-configuration">
-        <h2 class="header-secondary">Konfigurace</h2>
-        <p id="time-since-startup"></p>
-        <p id="pwm-value"></p>
-        <form action="/setPWM" method="get">
-          <label for="pwm">PWM</label>
-          <input type="number" id="pwm" name="pwm" min="0" max="100" required />
-          <input class="btn" type="submit" value="Nastavit" />
-        </form>
-        <div class="testing">
-          <p><a class="btn" href="/testPWM">Test PWM</a></p>
-          <p><a class="btn" href="/breath-on">Zapnout dýchání</a></p>
-          <p><a class="btn" href="/breath-off">Vypnout dýchání</a></p>
-        </div>
-      </div>
+    </div>
+    <div class="section-settings">
+      <p id="time-since-startup"></p>
+      <p id="pwm-value"></p>
     </div>
     <script src="script.js"></script>
   </body>

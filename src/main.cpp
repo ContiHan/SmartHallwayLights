@@ -260,6 +260,9 @@ void setServerResponses()
 
   setFaviconServerResponses();
 
+  server.on("/current-led-state", []()
+            { server.send(200, "text/plain", pwmValue > 0 ? "on" : "off"); });
+
   server.on("/time-since-startup", []()
             { server.send(200, "text/plain", elapsedTimeHtml()); });
 
