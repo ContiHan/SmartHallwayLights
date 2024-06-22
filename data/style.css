@@ -63,23 +63,18 @@ body {
   background-color: var(--yellow-color--dark);
 }
 
-.bulb {
-  max-width: 36rem;
-  max-height: 46rem;
+.bulb-icon-off,
+.bulb-icon-on {
+  width: 100%;
+  height: 100%;
 }
 
 .bulb-icon-off {
   color: var(--black-color--dark);
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
 }
 
 .bulb-icon-on {
   color: var(--yellow-color--light);
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
 }
 
 .switch {
