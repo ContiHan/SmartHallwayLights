@@ -1,3 +1,7 @@
+/*
+ SECTION - GENERAL
+*/
+
 :root {
   --black-color--dark: #040203;
   --black-color--light: #323232;
@@ -28,7 +32,11 @@ body {
   color: white;
 }
 
-h1 {
+/*
+ SECTION - MAIN
+*/
+
+.heading-primary {
   font-size: 4.8rem;
   letter-spacing: 0.2rem;
   text-align: center;
