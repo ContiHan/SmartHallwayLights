@@ -31,37 +31,34 @@ body {
 h1 {
   font-size: 4.8rem;
   letter-spacing: 0.2rem;
-}
-
-.container {
-  display: flex;
-  margin: 8rem 0 80rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.card {
-  width: 30rem;
   text-align: center;
 }
 
-body.off {
+.section-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  margin-bottom: 80rem;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.section-main.off {
   background-color: var(--black-color--light);
 }
 
-body.on {
+.section-main.on {
   background-color: var(--yellow-color--dark);
 }
 
 .bulb {
-  width: 30rem;
-  height: 45rem;
-  margin: 2rem auto;
+  max-width: 36rem;
+  max-height: 46rem;
 }
 
 .bulb-icon-off {
   color: var(--black-color--dark);
-  transform: scale(1.25);
   width: 100%;
   height: 100%;
   margin: 0 auto;
@@ -69,7 +66,6 @@ body.on {
 
 .bulb-icon-on {
   color: var(--yellow-color--light);
-  transform: scale(1.25);
   width: 100%;
   height: 100%;
   margin: 0 auto;
@@ -121,7 +117,6 @@ body.on {
   width: 100%;
   text-align: center;
   line-height: 6.8rem;
-  color: white;
   font-weight: bold;
   font-size: 2rem;
   transition: 0.4s;
@@ -137,7 +132,6 @@ input:checked + .slider:before {
 
 input:checked ~ .slider-text {
   left: -2.4rem;
-  color: white;
 }
 
 .slider-text {

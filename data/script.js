@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const checkbox = document.getElementById("toggle-switch");
-  const body = document.querySelector("body");
+  const sectionMain = document.querySelector(".section-main");
   const sliderText = document.querySelector(".slider-text");
   const bulbIconOff = document.querySelector(".bulb-icon-off");
   const bulbIconOn = document.querySelector(".bulb-icon-on");
@@ -10,15 +10,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (isOn) {
       checkbox.checked = true;
       sliderText.textContent = "ON";
-      body.classList.remove("off");
-      body.classList.add("on");
+      sectionMain.classList.remove("off");
+      sectionMain.classList.add("on");
       bulbIconOff.classList.add("hidden");
       bulbIconOn.classList.remove("hidden");
     } else {
       checkbox.checked = false;
       sliderText.textContent = "OFF";
-      body.classList.remove("on");
-      body.classList.add("off");
+      sectionMain.classList.remove("on");
+      sectionMain.classList.add("off");
       bulbIconOff.classList.remove("hidden");
       bulbIconOn.classList.add("hidden");
     }
