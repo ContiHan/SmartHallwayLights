@@ -3,7 +3,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   initializeModal();
   initializeSwitch();
-  loadAllDataOnRefresh();
 });
 
 function initializeModal() {
@@ -18,6 +17,7 @@ function initializeModal() {
   btnOpenModal.addEventListener("click", () => {
     toggleModalVisibility();
     toggleOverlayVisibility();
+    updateModalData();
   });
 
   btnCloseModal.addEventListener("click", () => {
@@ -91,11 +91,11 @@ function getPwmValue() {
   fetchAndUpdate("/pwm-value", (data) => {
     document.getElementById(
       "pwm-value"
-    ).innerHTML = `PWM nastaveno na <strong>${data} %</strong>`;
+    ).innerHTML = `PWM nastaveno na <strong>${data}&nbsp;%</strong>`;
   });
 }
 
-function loadAllDataOnRefresh() {
+function updateModalData() {
   loadElapsedTime();
   getPwmValue();
 }
