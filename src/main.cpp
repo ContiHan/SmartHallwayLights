@@ -17,7 +17,8 @@
 #define MAX_DUTY 8192
 #define DUTY_STEP 82
 #define PWM_DELAY 50
-#define TASK_DELAY 100
+#define TASK_DELAY_10 10
+#define TASK_DELAY_100 100
 
 #define BREATH_IN_START 22
 #define BREATH_IN_END 35
@@ -28,11 +29,13 @@
 #define BREATH_OUT_TIME 2000
 #define BREATH_HOLD_OUT_TIME 2500
 
+#define PIR_SENSOR_PIN 27
+
 WebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
-const char *mdnsName = "smart-led-corridor";
+const char *mdnsName = "smart-hallway-lights";
 
 String indexHtml;
 String styleCss;
@@ -49,10 +52,18 @@ bool testingPWM = false;
 bool breathing = false;
 unsigned long startTimestamp;
 
+int pirState = HIGH;
+int lastPirState = HIGH;
+unsigned long pirLastTriggered = 0;
+const unsigned long ledOffDelay = 5 * 60 * 1000;
+
 void setupPWM();
 void setupRelays();
+void setupPir();
 void setPWMDutyCycle(int dutyCycle);
-void cyclePWMTask(void *parameter);
+void pirSensorTask(void *parameter);
+void serverTask(void *parameter);
+void otaTask(void *parameter);
 void breathPWMTask(void *parameter);
 void initTasks();
 void setWifiConnection();
@@ -79,6 +90,7 @@ void setup()
   initSPIFFSAndLoadFiles();
   setupPWM();
   setupRelays();
+  setupPir();
   initTasks();
   setWifiConnection();
   setupMDNS();
@@ -86,6 +98,11 @@ void setup()
   setTimeClient();
   startWebServer();
   initArduinoOTA();
+}
+
+void setupPir()
+{
+  pinMode(PIR_SENSOR_PIN, INPUT_PULLUP);
 }
 
 void turnLedPowerSupplyOn()
@@ -226,7 +243,9 @@ void setTimeClient()
 
 void initTasks()
 {
-  xTaskCreate(cyclePWMTask, "PWM Cycle Task", 2048, NULL, 1, NULL);
+  xTaskCreate(pirSensorTask, "PIR Sensor Task", 2048, NULL, 4, NULL);
+  xTaskCreate(serverTask, "Server Task", 2048, NULL, 3, NULL);
+  xTaskCreate(otaTask, "OTA Task", 2048, NULL, 2, NULL);
   xTaskCreate(breathPWMTask, "Breath PWM Task", 2048, NULL, 1, NULL);
 }
 
@@ -322,6 +341,11 @@ void setServerResponses()
     Serial.println("Začíná test PWM cyklu");
     redirectToRoot(); });
 
+  server.on("/pir-state", []()
+            {
+  int pirState = digitalRead(PIR_SENSOR_PIN);
+  server.send(200, "text/plain", pirState == HIGH ? "OFF" : "ON"); });
+
   server.onNotFound(unknownHtmlMessage);
 }
 
@@ -408,28 +432,6 @@ void setPWMDutyCycle(int dutyCycle)
   ledcWrite(PWM_CHANNEL_0, dutyCycle);
 }
 
-void cyclePWMTask(void *parameter)
-{
-  for (;;)
-  {
-    if (testingPWM)
-    {
-      for (int duty = 0; duty <= MAX_DUTY; duty += DUTY_STEP)
-      {
-        setPWMDutyCycle(duty);
-        vTaskDelay(pdMS_TO_TICKS(PWM_DELAY));
-      }
-      for (int duty = MAX_DUTY; duty >= 0; duty -= DUTY_STEP)
-      {
-        setPWMDutyCycle(duty);
-        vTaskDelay(pdMS_TO_TICKS(PWM_DELAY));
-      }
-      testingPWM = false;
-    }
-    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
-  }
-}
-
 void breathPWMTask(void *parameter)
 {
   for (;;)
@@ -453,18 +455,61 @@ void breathPWMTask(void *parameter)
         vTaskDelay(pdMS_TO_TICKS(BREATH_OUT_TIME / (BREATH_OUT_START - BREATH_OUT_END)));
       }
       // Hold breath
-      vTaskDelay(pdMS_TO_TICKS(BREATH_HOLD_OUT_TIME - TASK_DELAY));
+      vTaskDelay(pdMS_TO_TICKS(BREATH_HOLD_OUT_TIME - TASK_DELAY_100));
     }
     else
     {
       setPWMDutyCycle(map(pwmValue, 0, 100, 0, MAX_DUTY));
     }
-    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
+    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_100));
+  }
+}
+
+void pirSensorTask(void *parameter)
+{
+  for (;;)
+  {
+    pirState = digitalRead(PIR_SENSOR_PIN);
+
+    if (pirState == LOW && lastPirState == HIGH)
+    {
+      fadeIn(pwmValue, 28);
+      pirLastTriggered = millis();
+    }
+    else if (pirState == HIGH && lastPirState == LOW)
+    {
+      pirLastTriggered = millis();
+    }
+
+    if (millis() - pirLastTriggered >= ledOffDelay)
+    {
+      fadeOut(pwmValue, 0);
+    }
+
+    lastPirState = pirState;
+
+    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_100));
+  }
+}
+
+void serverTask(void *parameter)
+{
+  for (;;)
+  {
+    server.handleClient();
+    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_10));
+  }
+}
+
+void otaTask(void *parameter)
+{
+  for (;;)
+  {
+    ArduinoOTA.handle();
+    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_10));
   }
 }
 
 void loop()
 {
-  server.handleClient();
-  ArduinoOTA.handle();
 }

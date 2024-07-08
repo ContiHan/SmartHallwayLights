@@ -95,7 +95,16 @@ function getPwmValue() {
   });
 }
 
+function getPirState() {
+  fetchAndUpdate("/pir-state", (data) => {
+    document.getElementById(
+      "pir-state"
+    ).innerHTML = `Stav PIR <strong>${data}</strong>`;
+  });
+}
+
 function updateModalData() {
   loadElapsedTime();
   getPwmValue();
+  getPirState();
 }
