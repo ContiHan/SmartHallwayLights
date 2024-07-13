@@ -68,6 +68,7 @@ void breathPWMTask(void *parameter);
 void initTasks();
 void setServerResponses();
 void setFaviconServerResponses();
+void handleReset();
 void unknownHtmlMessage();
 void setTimeClient();
 String elapsedTimeHtml();
@@ -328,7 +329,20 @@ void setServerResponses()
   int pirState = digitalRead(PIR_SENSOR_PIN);
   server.send(200, "text/plain", pirState == HIGH ? "OFF" : "ON"); });
 
+  server.on("/reset", handleReset);
+
+  server.on("/reset", []()
+            { handleReset(),
+                  redirectToRoot(); });
+
   server.onNotFound(unknownHtmlMessage);
+}
+
+void handleReset()
+{
+  server.send(200, "text/html", "<html><body><h1>Device is restarting...</h1><p>Please wait a moment.</p><script>setTimeout(function(){window.location.href='/'}, 5000);</script></body></html>");
+  delay(100);
+  ESP.restart();
 }
 
 void setFaviconServerResponses()
