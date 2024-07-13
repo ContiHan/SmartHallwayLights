@@ -1,6 +1,5 @@
+#include <WifiManager.h>
 #include <WifiCredentials.h>
-#include <WiFi.h>
-#include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <NTPClient.h>
@@ -34,6 +33,7 @@
 WebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
+WifiManager wifiManager(wifiSSID, wifiPassword);
 
 const char *mdnsName = "smart-hallway-lights";
 
@@ -66,7 +66,6 @@ void serverTask(void *parameter);
 void otaTask(void *parameter);
 void breathPWMTask(void *parameter);
 void initTasks();
-void setWifiConnection();
 void setServerResponses();
 void setFaviconServerResponses();
 void unknownHtmlMessage();
@@ -92,7 +91,7 @@ void setup()
   setupRelays();
   setupPir();
   initTasks();
-  setWifiConnection();
+  wifiManager.connect();
   setupMDNS();
   setServerResponses();
   setTimeClient();
@@ -247,23 +246,6 @@ void initTasks()
   xTaskCreate(serverTask, "Server Task", 2048, NULL, 3, NULL);
   xTaskCreate(otaTask, "OTA Task", 2048, NULL, 2, NULL);
   xTaskCreate(breathPWMTask, "Breath PWM Task", 2048, NULL, 1, NULL);
-}
-
-void setWifiConnection()
-{
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(wifiSSID, wifiPassword);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.print("Pripojeno k WiFi siti: ");
-  Serial.println(wifiSSID);
-  Serial.print("IP adresa: ");
-  Serial.println(WiFi.localIP());
 }
 
 void setServerResponses()
