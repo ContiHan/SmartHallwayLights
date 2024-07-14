@@ -243,9 +243,9 @@ void setTimeClient()
 
 void initTasks()
 {
-  xTaskCreate(pirSensorTask, "PIR Sensor Task", 2048, NULL, 4, NULL);
+  xTaskCreate(otaTask, "OTA Task", 2048, NULL, 4, NULL);
   xTaskCreate(serverTask, "Server Task", 2048, NULL, 3, NULL);
-  xTaskCreate(otaTask, "OTA Task", 2048, NULL, 2, NULL);
+  xTaskCreate(pirSensorTask, "PIR Sensor Task", 2048, NULL, 2, NULL);
   xTaskCreate(breathPWMTask, "Breath PWM Task", 2048, NULL, 1, NULL);
 }
 
