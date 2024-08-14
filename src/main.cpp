@@ -467,22 +467,19 @@ void pirSensorTask(void *parameter)
   {
     pirState = digitalRead(PIR_SENSOR_PIN);
 
-    if (pirState == LOW && lastPirState == HIGH)
+    if (pirState != lastPirState)
     {
-      fadeIn(pwmValue, 28);
-      pirLastTriggered = millis();
-    }
-    else if (pirState == HIGH && lastPirState == LOW)
-    {
-      pirLastTriggered = millis();
-    }
+      if (pirState == LOW)
+      {
+        fadeIn(pwmValue, 28);
+      }
+      else if (pirState == HIGH)
+      {
+        fadeOut(pwmValue, 0);
+      }
 
-    if (millis() - pirLastTriggered >= ledOffDelay)
-    {
-      fadeOut(pwmValue, 0);
+      lastPirState = pirState;
     }
-
-    lastPirState = pirState;
 
     vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_100));
   }
