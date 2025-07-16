@@ -12,4 +12,5 @@
 
 # CLI
 
-- "pio run -t uploadfs" for upload files from data folder into ESP32
+- "pio run -t upload" for upload source code into ESP32
+- "pio run -t uploadfs" for upload files (HTML, CSS, etc) from data folder into ESP32
